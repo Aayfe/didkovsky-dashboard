@@ -1,139 +1,665 @@
 <!doctype html>
 <html lang="cs">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>didkovsky.cz — Dashboard</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-:root{
---bg:#0b0d10;
---panel:rgba(255,255,255,0.04);
---panel2:rgba(255,255,255,0.06);
---text:rgba(255,255,255,0.92);
---muted:rgba(255,255,255,0.62);
---line:rgba(255,255,255,0.10);
---radius:18px;
-}
-*{box-sizing:border-box}
-body{margin:0;font-family:Inter,system-ui;background:var(--bg);color:var(--text)}
-.wrap{padding:40px 50px 80px}
-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:20px}
-.brand{font-weight:600}
-.btn{padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--text);cursor:pointer}
-.btn:hover{background:var(--panel2)}
-.hidden{display:none}
-.dashboard{margin-top:40px;display:grid;grid-template-columns:260px 1fr;gap:24px}
-.sidebar,.content{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius)}
-.sidebar{padding:20px}
-.sidebar a{display:block;padding:8px 10px;border-radius:12px;color:var(--muted)}
-.sidebar a:hover{background:var(--panel2);color:var(--text)}
-.content{padding:24px}
-.card{background:var(--panel2);padding:16px;border-radius:14px;margin-bottom:14px}
-.modalBack{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center}
-.modalBack.open{display:flex}
-.modal{background:#111;border:1px solid var(--line);padding:20px;border-radius:20px;width:420px}
-.input{width:100%;padding:10px;border-radius:12px;border:1px solid var(--line);background:#111;color:white;margin-bottom:10px}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>didkovsky.cz — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b0d10;
+      --panel:rgba(255,255,255,0.04);
+      --panel2:rgba(255,255,255,0.06);
+      --text:rgba(255,255,255,0.92);
+      --muted:rgba(255,255,255,0.62);
+      --line:rgba(255,255,255,0.10);
+      --radius:18px;
+      --danger:#ff6b6b;
+      --ok:#7ee787;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:
+        radial-gradient(1200px 700px at 10% 0%, rgba(255,255,255,0.06), transparent 60%),
+        radial-gradient(900px 600px at 100% 40%, rgba(255,255,255,0.04), transparent 65%),
+        var(--bg);
+      color:var(--text);
+    }
+
+    .wrap{padding:40px 50px 80px}
+
+    header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      border-bottom:1px solid var(--line);
+      padding-bottom:20px;
+    }
+    .brand{font-weight:600;font-size:18px}
+
+    .btn{
+      padding:9px 14px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:transparent;
+      color:var(--text);
+      cursor:pointer;
+      transition:0.2s ease;
+      font-size:14px;
+    }
+    .btn:hover{background:var(--panel2)}
+    .btn:disabled{opacity:.55; cursor:not-allowed}
+
+    .hidden{display:none}
+
+    .dashboard{
+      margin-top:40px;
+      display:grid;
+      grid-template-columns:260px 1fr;
+      gap:24px;
+      align-items:start;
+    }
+
+    .sidebar,.content{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+    }
+
+    .sidebar{padding:20px}
+    .navTitle{font-size:12px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin:0 0 12px}
+
+    .nav a{
+      display:block;
+      padding:10px 12px;
+      border-radius:12px;
+      color:var(--muted);
+      text-decoration:none;
+      font-size:14px;
+    }
+    .nav a:hover{background:rgba(255,255,255,0.06); color:var(--text)}
+    .nav a.active{background:rgba(255,255,255,0.08); color:var(--text)}
+
+    .content{padding:24px; min-height:360px}
+
+    .card{
+      background:var(--panel2);
+      padding:16px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      margin-bottom:14px;
+    }
+
+    h1{margin:22px 0 10px; font-size:42px; line-height:1.05}
+    h2{margin:0 0 14px; font-size:18px}
+    .subtitle{color:var(--muted); line-height:1.6; max-width:70ch}
+
+    .meCard{margin-top:16px}
+    .meLine{color:var(--muted); font-size:12px; margin-bottom:6px}
+    .meValue{font-size:14px}
+
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .spacer{height:10px}
+
+    .kpi{display:flex; gap:14px; flex-wrap:wrap}
+    .kpi .item{min-width:160px}
+    .kpi .label{color:var(--muted); font-size:12px; margin-bottom:6px}
+    .kpi .value{font-size:22px; font-weight:600}
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .alert{border:1px solid var(--line); border-radius:14px; padding:12px 14px; color:var(--muted); font-size:13px; line-height:1.6}
+    .alert.danger{border-color:rgba(255,107,107,.35); color:rgba(255,255,255,.86)}
+
+    /* Modal */
+    .modalBack{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.62);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+    }
+    .modalBack.open{display:flex}
+
+    .modal{
+      width:min(460px, 100%);
+      background:rgba(13,15,18,.92);
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:18px;
+      backdrop-filter: blur(10px);
+    }
+
+    .modalHead{display:flex; justify-content:space-between; gap:12px; align-items:flex-start; margin-bottom:10px}
+    .modalTitle{margin:0; font-size:16px; font-weight:600}
+    .modalNote{margin:0; color:var(--muted); font-size:13px; line-height:1.55}
+
+    .field{display:flex; flex-direction:column; gap:8px; margin-top:12px}
+    .field label{font-size:12px; color:var(--muted)}
+
+    .input{
+      width:100%;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:transparent;
+      color:var(--text);
+      outline:none;
+    }
+
+    .hint{margin-top:10px; color:var(--danger); font-size:13px; min-height:18px}
+
+    footer{
+      margin-top:70px;
+      border-top:1px solid var(--line);
+      padding-top:18px;
+      color:var(--muted);
+      font-size:13px;
+      display:flex;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    @media(max-width:900px){
+      .wrap{padding:26px 18px 60px}
+      .dashboard{grid-template-columns:1fr}
+    }
+  </style>
 </head>
 <body>
-<div class="wrap">
-<header>
-<div class="brand">Jakub Didkovský</div>
-<div id="topNav"><button class="btn" onclick="openLogin()">Login</button></div>
-</header>
+  <div class="wrap">
+    <header>
+      <div class="brand">Jakub Didkovský</div>
+      <div id="topNav" class="row">
+        <button class="btn" id="btnLogin">Login</button>
+      </div>
+    </header>
 
-<section id="landing">
-<h1>Soukromý dashboard</h1>
-<button class="btn" onclick="openLogin()">Přihlásit se</button>
-</section>
+    <main>
+      <section id="landing">
+        <h1>Soukromý dashboard</h1>
+        <p class="subtitle">
+          Přihlášení přes Supabase. Role a profil se načítají z tabulky <b>profiles</b>.
+          
+          <br><br>
+          Pokud se po přihlášení zobrazuje „Nejsi přihlášen“, znamená to, že se nepodařilo načíst profil (nejčastěji RLS/policy nebo chybějící řádek v profiles).
+        </p>
+        <div class="row" style="margin-top:16px">
+          <button class="btn" id="btnLogin2">Přihlásit se</button>
+          <span class="pill" id="envBadge">Supabase: OK</span>
+        </div>
+      </section>
 
-<section id="app" class="hidden">
-<div class="dashboard">
-<div class="sidebar">
-<a href="#" onclick="showOverview()">Přehled</a>
-<a href="#" onclick="showUsers()">Uživatelé</a>
-<div class="card" style="margin-top:20px">
-<div id="who">—</div>
-<div id="role"></div>
-</div>
-</div>
-<div class="content" id="view"></div>
-</div>
-</section>
+      <section id="app" class="hidden">
+        <div class="dashboard">
+          <aside class="sidebar">
+            <p class="navTitle">Navigace</p>
+            <nav class="nav">
+              <a href="#" data-view="overview" class="active">Přehled</a>
+              <a href="#" data-view="drive">Google Disk</a>
+              <a href="#" data-view="users">Uživatelé</a>
+              <a href="#" data-view="settings">Nastavení</a>
+            </nav>
 
-<div class="modalBack" id="loginModal">
-<div class="modal">
-<h3>Přihlášení</h3>
-<input class="input" id="email" placeholder="Email" />
-<input class="input" id="pass" type="password" placeholder="Heslo" />
-<button class="btn" onclick="doLogin()">Login</button>
-<div id="loginHint" style="margin-top:10px;color:#ff6b6b"></div>
-</div>
-</div>
+            <div class="card meCard">
+              <div class="meLine">Přihlášen jako</div>
+              <div class="meValue" id="who">—</div>
+              <div class="spacer"></div>
+              <span class="pill" id="role">—</span>
+            </div>
+          </aside>
 
-</div>
+          <section class="content">
+            <div id="view"></div>
+          </section>
+        </div>
+      </section>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const SUPABASE_URL = "https://jfvywczxlqwpmoivfipi.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_fmIDjWp5Oi_7cbZt4-80Jw_sSdThg2N";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      <!-- Login modal -->
+      <div class="modalBack" id="loginModal" aria-hidden="true">
+        <div class="modal" role="dialog" aria-modal="true" aria-label="Přihlášení">
+          <div class="modalHead">
+            <div>
+              <p class="modalTitle">Přihlášení</p>
+              <p class="modalNote">Používá Supabase Auth (email + heslo).</p>
+            </div>
+            <button class="btn" id="btnCloseLogin">Zavřít</button>
+          </div>
 
-let currentProfile = null;
+          <div class="field">
+            <label for="email">E-mail</label>
+            <input class="input" id="email" type="email" placeholder="např. jakub@didkovsky.cz" autocomplete="username" />
+          </div>
 
-function openLogin(){document.getElementById('loginModal').classList.add('open')}
-function closeLogin(){document.getElementById('loginModal').classList.remove('open')}
+          <div class="field">
+            <label for="pass">Heslo</label>
+            <input class="input" id="pass" type="password" placeholder="••••••••" autocomplete="current-password" />
+          </div>
 
-async function doLogin(){
-const email=document.getElementById('email').value.trim();
-const password=document.getElementById('pass').value;
-const {data,error}=await supabase.auth.signInWithPassword({email,password});
-if(error){document.getElementById('loginHint').innerText=error.message;return}
-closeLogin();
-loadProfile(data.user.id);
-}
+          <div class="row" style="margin-top:12px; justify-content:space-between">
+            <button class="btn" id="btnDoLogin">Login</button>
+            <span class="pill" id="loginState">—</span>
+          </div>
 
-async function loadProfile(id){
-const {data}=await supabase.from('profiles').select('*').eq('id',id).single();
-if(!data){alert('Profil nenalezen');return}
-currentProfile=data;
-enterApp();
-}
+          <div class="hint" id="loginHint"></div>
+        </div>
+      </div>
 
-function enterApp(){
-document.getElementById('landing').classList.add('hidden');
-document.getElementById('app').classList.remove('hidden');
-document.getElementById('topNav').innerHTML='<button class="btn" onclick="logout()">Logout</button>';
-document.getElementById('who').innerText=currentProfile.email;
-document.getElementById('role').innerText=currentProfile.role;
-showOverview();
-}
+      <!-- Change password modal -->
+      <div class="modalBack" id="pwModal" aria-hidden="true">
+        <div class="modal" role="dialog" aria-modal="true" aria-label="Změna hesla">
+          <div class="modalHead">
+            <div>
+              <p class="modalTitle">Změna hesla</p>
+              <p class="modalNote">Při prvním přihlášení vyžadováno. (Flag: <b>must_change_password</b>)</p>
+            </div>
+            <button class="btn" id="btnClosePw" disabled title="Nejdřív změň heslo">Zavřít</button>
+          </div>
 
-async function logout(){
-await supabase.auth.signOut();
-location.reload();
-}
+          <div class="field">
+            <label for="newpass">Nové heslo</label>
+            <input class="input" id="newpass" type="password" placeholder="min. 8 znaků" autocomplete="new-password" />
+          </div>
 
-function showOverview(){
-document.getElementById('view').innerHTML=`<h2>Přehled</h2><div class="card">Vítej v dashboardu.</div>`;
-}
+          <div class="row" style="margin-top:12px; justify-content:space-between">
+            <button class="btn" id="btnSavePw">Uložit</button>
+            <span class="pill" id="pwState">—</span>
+          </div>
 
-async function showUsers(){
-if(currentProfile.role!=='owner'){document.getElementById('view').innerHTML='<div class="card">Nemáš oprávnění</div>';return}
-const {data}=await supabase.from('profiles').select('email,role');
-let html='<h2>Uživatelé</h2><div class="card">';
-data.forEach(u=>{html+=`<div>${u.email} — ${u.role}</div>`});
-html+='</div>';
-document.getElementById('view').innerHTML=html;
-}
+          <div class="hint" id="pwHint"></div>
+        </div>
+      </div>
 
-window.addEventListener('load',async()=>{
-const {data}=await supabase.auth.getSession();
-if(data.session){loadProfile(data.session.user.id)}
-});
-</script>
+    </main>
+
+    <footer>
+      <div>© 2026 · didkovsky.cz</div>
+      <div id="debugFoot">ready</div>
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // === KONFIG ===
+    const SUPABASE_URL = "https://jfvywczxlqwpmoivfipi.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_fmIDjWp5Oi_7cbZt4-80Jw_sSdThg2N";
+
+    // === HELPERS ===
+    const $ = (id) => document.getElementById(id);
+    const qs = (sel, el=document) => el.querySelector(sel);
+    const qsa = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+
+    const setText = (id, text) => { $(id).textContent = text; };
+    const setHTML = (id, html) => { $(id).innerHTML = html; };
+
+    const openModal = (id) => { $(id).classList.add('open'); $(id).setAttribute('aria-hidden', 'false'); };
+    const closeModal = (id) => { $(id).classList.remove('open'); $(id).setAttribute('aria-hidden', 'true'); };
+
+    const badge = (ok, text) => {
+      const el = $('envBadge');
+      el.textContent = text;
+      el.style.color = ok ? 'rgba(255,255,255,0.72)' : 'rgba(255,255,255,0.92)';
+      el.style.borderColor = ok ? 'rgba(126,231,135,0.30)' : 'rgba(255,107,107,0.35)';
+    };
+
+    // === INIT SUPABASE (bez pádu stránky) ===
+    let supabase = null;
+    try {
+      if (!SUPABASE_URL?.startsWith('https://') || !SUPABASE_ANON_KEY) {
+        badge(false, 'Supabase: chybí konfigurace');
+      } else {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        badge(true, 'Supabase: OK');
+      }
+    } catch (e) {
+      console.error(e);
+      badge(false, 'Supabase: chyba');
+    }
+
+    const state = {
+      user: null,
+      profile: null,
+      activeView: 'overview',
+    };
+
+    const roleLabel = (role) => ({ host:'Host', moderator:'Moderátor', owner:'Owner' }[role] || role || '—');
+
+    const can = {
+      upload: (p) => p?.role === 'moderator' || p?.role === 'owner',
+      manageUsers: (p) => p?.role === 'owner',
+    };
+
+    // === UI WIRING ===
+    function wireUI(){
+      // login buttons
+      $('btnLogin').addEventListener('click', () => openLogin());
+      $('btnLogin2').addEventListener('click', () => openLogin());
+      $('btnCloseLogin').addEventListener('click', () => closeLogin());
+      $('btnDoLogin').addEventListener('click', () => doLogin());
+
+      // modal close by backdrop
+      $('loginModal').addEventListener('click', (e) => { if(e.target === $('loginModal')) closeLogin(); });
+      $('pwModal').addEventListener('click', (e) => { if(e.target === $('pwModal')) {/* locked */} });
+
+      // nav
+      qsa('.nav a').forEach(a => {
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          const view = a.getAttribute('data-view');
+          setActiveView(view);
+        });
+      });
+
+      // enter submits
+      $('pass').addEventListener('keydown', (e) => { if(e.key === 'Enter') doLogin(); });
+      $('newpass').addEventListener('keydown', (e) => { if(e.key === 'Enter') savePw(); });
+
+      // pw
+      $('btnSavePw').addEventListener('click', () => savePw());
+
+      // esc
+      window.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape'){
+          if($('loginModal').classList.contains('open')) closeLogin();
+        }
+      });
+    }
+
+    function openLogin(){
+      setText('loginHint', '');
+      setText('loginState', '—');
+      $('btnDoLogin').disabled = false;
+      openModal('loginModal');
+      $('email').focus();
+    }
+
+    function closeLogin(){
+      closeModal('loginModal');
+    }
+
+    function openPw(){
+      setText('pwHint', '');
+      setText('pwState', '—');
+      openModal('pwModal');
+      $('newpass').focus();
+    }
+
+    function closePw(){
+      closeModal('pwModal');
+    }
+
+    // === AUTH + DATA ===
+    async function loadProfile(userId){
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if(error){
+        // Tohle je nejčastější důvod, proč „uvnitř nic nefunguje“.
+        // Buď chybí řádek v profiles, nebo RLS policy nepustí SELECT.
+        console.error('loadProfile error:', error);
+        throw new Error('Nelze načíst profil (profiles/RLS).');
+      }
+
+      return data;
+    }
+
+    async function doLogin(){
+      if(!supabase){
+        setText('loginHint', 'Supabase není inicializované.');
+        return;
+      }
+
+      const email = $('email').value.trim();
+      const password = $('pass').value;
+
+      setText('loginHint', '');
+      setText('loginState', 'Přihlašuji…');
+      $('btnDoLogin').disabled = true;
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+      $('btnDoLogin').disabled = false;
+      if(error){
+        setText('loginState', '—');
+        setText('loginHint', error.message);
+        return;
+      }
+
+      state.user = data.user;
+
+      try {
+        state.profile = await loadProfile(state.user.id);
+      } catch (e) {
+        setText('loginState', 'Profil nenalezen');
+        setText('loginHint', e.message || 'Nelze načíst profil');
+        return;
+      }
+
+      closeLogin();
+      enterApp();
+
+      if(state.profile?.must_change_password){
+        openPw();
+      }
+    }
+
+    async function savePw(){
+      const p = $('newpass').value;
+      if(!p || p.length < 8){
+        setText('pwHint', 'Heslo musí mít aspoň 8 znaků.');
+        return;
+      }
+
+      setText('pwHint', '');
+      setText('pwState', 'Ukládám…');
+      $('btnSavePw').disabled = true;
+
+      const { error } = await supabase.auth.updateUser({ password: p });
+      if(error){
+        $('btnSavePw').disabled = false;
+        setText('pwState', '—');
+        setText('pwHint', error.message);
+        return;
+      }
+
+      const { error: upErr } = await supabase
+        .from('profiles')
+        .update({ must_change_password: false })
+        .eq('id', state.user.id);
+
+      $('btnSavePw').disabled = false;
+
+      if(upErr){
+        setText('pwState', '—');
+        setText('pwHint', 'Heslo změněno, ale profil se neaktualizoval (RLS).');
+        console.error(upErr);
+        return;
+      }
+
+      state.profile.must_change_password = false;
+      setText('pwState', 'Hotovo');
+      closePw();
+      render();
+    }
+
+    async function logout(){
+      await supabase.auth.signOut();
+      state.user = null;
+      state.profile = null;
+      $('landing').classList.remove('hidden');
+      $('app').classList.add('hidden');
+      $('topNav').innerHTML = '<button class="btn" id="btnLogin">Login</button>';
+      wireUI();
+    }
+
+    // === APP SHELL ===
+    function enterApp(){
+      $('landing').classList.add('hidden');
+      $('app').classList.remove('hidden');
+
+      $('topNav').innerHTML = '<button class="btn" id="btnLogout">Logout</button>';
+      $('btnLogout').addEventListener('click', logout);
+
+      setText('who', state.profile?.email || state.user?.email || '—');
+      setText('role', roleLabel(state.profile?.role));
+
+      setActiveView('overview');
+      setText('debugFoot', 'signed in');
+    }
+
+    function setActiveView(view){
+      state.activeView = view;
+      qsa('.nav a').forEach(a => {
+        a.classList.toggle('active', a.getAttribute('data-view') === view);
+      });
+      render();
+    }
+
+    // === VIEWS ===
+    async function render(){
+      if(!state.profile){
+        setHTML('view', '<div class="alert danger">Nejsi přihlášen.</div>');
+        return;
+      }
+
+      if(state.activeView === 'overview'){
+        setHTML('view', `
+          <h2>Přehled</h2>
+          <div class="card">
+            <div class="kpi">
+              <div class="item"><div class="label">Role</div><div class="value">${roleLabel(state.profile.role)}</div></div>
+              <div class="item"><div class="label">Google propojeno</div><div class="value">${state.profile.google_linked ? 'ano' : 'ne'}</div></div>
+              <div class="item"><div class="label">Změna hesla</div><div class="value">${state.profile.must_change_password ? 'ano' : 'ne'}</div></div>
+            </div>
+          </div>
+          <div class="alert">
+            Tip: Pokud chceš „live stats návštěvnosti“, uděláme je z tabulky <b>pageviews</b> (free), nebo napojíme GA4.
+          </div>
+        `);
+        return;
+      }
+
+      if(state.activeView === 'drive'){
+        setHTML('view', `
+          <h2>Google Disk</h2>
+          <div class="alert">
+            Drive integrace vyžaduje server-side OAuth (kvůli refresh tokenům). To nejde bezpečně udělat jen v čistém statickém HTML.
+            
+            <div class="spacer"></div>
+            Ready-to-launch varianta: Next.js na Vercelu + Supabase DB/Auth + serverless API pro Google OAuth.
+          </div>
+        `);
+        return;
+      }
+
+      if(state.activeView === 'users'){
+        if(!can.manageUsers(state.profile)){
+          setHTML('view', '<h2>Uživatelé</h2><div class="alert">Nemáš oprávnění (jen Owner).</div>');
+          return;
+        }
+
+        setHTML('view', '<h2>Uživatelé</h2><div class="card">Načítám…</div>');
+
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id,email,role,locked_owner,must_change_password,google_linked')
+          .order('email', { ascending: true });
+
+        if(error){
+          setHTML('view', `<h2>Uživatelé</h2><div class="alert danger">Nelze načíst uživatele (RLS/policy): ${error.message}</div>`);
+          return;
+        }
+
+        const rows = data.map(u => `
+          <div class="card" style="display:flex; justify-content:space-between; gap:14px; align-items:center; flex-wrap:wrap">
+            <div>
+              <div style="font-weight:600">${u.email}</div>
+              <div style="color:var(--muted); font-size:13px">
+                role: ${u.role}${u.locked_owner ? ' · locked' : ''} · google: ${u.google_linked ? 'ano' : 'ne'}
+              </div>
+            </div>
+            <span class="pill">${roleLabel(u.role)}</span>
+          </div>
+        `).join('');
+
+        setHTML('view', `
+          <h2>Uživatelé</h2>
+          <div class="alert">
+            Pozn.: Přidávání uživatelů a nastavování rolí vyžaduje backend se <b>service role</b> klíčem (ten do frontendu nikdy nedávej).
+            Jakmile přejdeme na Next.js, přidám sem formulář „Přidat uživatele“ + role editor.
+          </div>
+          ${rows || '<div class="card">Žádní uživatelé.</div>'}
+        `);
+        return;
+      }
+
+      if(state.activeView === 'settings'){
+        setHTML('view', `
+          <h2>Nastavení</h2>
+          <div class="card">
+            <div style="font-weight:600; margin-bottom:8px">Aktuální stav</div>
+            <div style="color:var(--muted); line-height:1.7; font-size:14px">
+              Přihlášen: <b>${state.user?.email || '—'}</b><br>
+              Profil role: <b>${roleLabel(state.profile?.role)}</b><br>
+              must_change_password: <b>${state.profile?.must_change_password ? 'true' : 'false'}</b><br>
+              google_linked: <b>${state.profile?.google_linked ? 'true' : 'false'}</b>
+            </div>
+          </div>
+          <div class="alert">
+            „Ready to launch“ verze s Drive + správou uživatelů = přepnout z čistého HTML na Next.js (stále zdarma na Vercelu).
+            Řekni a připravím ti přesný deploy krok-po-kroku bez lokálního Node.
+          </div>
+        `);
+        return;
+      }
+
+      setHTML('view', '<div class="alert">Neznámá sekce.</div>');
+    }
+
+    // === SESSION RESTORE ===
+    async function restoreSession(){
+      if(!supabase) return;
+
+      const { data } = await supabase.auth.getSession();
+      if(data.session?.user){
+        state.user = data.session.user;
+        try {
+          state.profile = await loadProfile(state.user.id);
+          enterApp();
+        } catch (e) {
+          // Pokud se session obnoví, ale profil nejde načíst, ukaž jasně proč.
+          $('landing').classList.remove('hidden');
+          $('app').classList.add('hidden');
+          badge(false, 'Supabase: profil/RLS problém');
+          setText('debugFoot', 'profile load failed');
+          console.error(e);
+        }
+      }
+    }
+
+    // boot
+    wireUI();
+    restoreSession();
+  </script>
 </body>
 </html>
