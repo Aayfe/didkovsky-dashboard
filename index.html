@@ -407,15 +407,18 @@
 
     // === AUTH + DATA ===
     async function loadProfile(userId){
-      const { data, error } = await supabaseClient
+      const { data, error, status } = await supabaseClient
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
+
+      // Pokud profil neexistuje, vrátí null bez pádu
+      if(status === 406 || !data){
+        return null;
+      }
 
       if(error){
-        // Tohle je nejčastější důvod, proč „uvnitř nic nefunguje“.
-        // Buď chybí řádek v profiles, nebo RLS policy nepustí SELECT.
         console.error('loadProfile error:', error);
         throw new Error('Nelze načíst profil (profiles/RLS).');
       }
@@ -450,17 +453,24 @@
       try {
         state.profile = await loadProfile(state.user.id);
       } catch (e) {
-        setText('loginState', 'Profil nenalezen');
+        setText('loginState', 'Chyba');
         setText('loginHint', e.message || 'Nelze načíst profil');
+        return;
+      }
+
+      if(!state.profile){
+        setText('loginState', 'Profil chybí');
+        setText('loginHint', 'V tabulce profiles neexistuje řádek pro tohoto uživatele.');
         return;
       }
 
       closeLogin();
       enterApp();
 
-      if(state.profile?.must_change_password){
+      if(state.profile.must_change_password){
         openPw();
       }
+    }
     }
 
     async function savePw(){
@@ -638,26 +648,11 @@
 
     // === SESSION RESTORE ===
     async function restoreSession(){
-      if(!supabase) return;
+      if(!supabaseClient) return;
 
       const { data } = await supabaseClient.auth.getSession();
       if(data.session?.user){
-        state.user = data.session.user;
-        try {
-          state.profile = await loadProfile(state.user.id);
-          enterApp();
-        } catch (e) {
-          // Pokud se session obnoví, ale profil nejde načíst, ukaž jasně proč.
-          $('landing').classList.remove('hidden');
-          $('app').classList.add('hidden');
-          badge(false, 'Supabase: profil/RLS problém');
-          setText('debugFoot', 'profile load failed');
-          console.error(e);
-        }
-      }
-    }
-
-    // boot
+        state.user = data.sessi
     window.addEventListener('DOMContentLoaded', () => {
       wireUI();
       restoreSession();
