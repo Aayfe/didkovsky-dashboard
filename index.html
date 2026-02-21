@@ -250,7 +250,7 @@
         </div>
       </section>
 
-      <!-- Login modal  -->
+      <!-- Login modal -->
       <div class="modalBack" id="loginModal" role="dialog" aria-modal="true">
         <div class="modal">
           <div class="modalHead">
@@ -354,7 +354,22 @@
     const SUPABASE_URL = "https://jfvywczxlqwpmoivfipi.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_fmIDjWp5Oi_7cbZt4-80Jw_sSdThg2N";
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let supabase = null;
+
+    try {
+      if (
+        SUPABASE_URL &&
+        SUPABASE_URL.startsWith("https://") &&
+        SUPABASE_ANON_KEY &&
+        !SUPABASE_ANON_KEY.includes("VLOZ_SEM")
+      ) {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      } else {
+        console.warn("Supabase není nastaveno – zkontroluj URL a ANON KEY.");
+      }
+    } catch (e) {
+      console.error("Chyba při inicializaci Supabase:", e);
+    }
 
     const OWNER_EMAIL = 'jakub@didkovsky.cz';
 
