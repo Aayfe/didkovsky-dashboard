@@ -298,7 +298,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     // === KONFIG ===
-    const SUPABASE_URL = "https://jfvywczxlqwpmoivfipi.supabaseClient.co";
+    const SUPABASE_URL = "https://jfvywczxlqwpmoivfipi.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_fmIDjWp5Oi_7cbZt4-80Jw_sSdThg2N";
 
     // === HELPERS ===
@@ -325,7 +325,7 @@
       if (!SUPABASE_URL?.startsWith('https://') || !SUPABASE_ANON_KEY) {
         badge(false, 'Supabase: chybí konfigurace');
       } else {
-        supabaseCliesupabaseClient.ow.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         badge(true, 'Supabase: OK');
       }
     } catch (e) {
@@ -407,7 +407,7 @@
 
     // === AUTH + DATA ===
     async function loadProfile(userId){
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClient
         .from('profiles')
         .select('*')
         .eq('id', userId)
@@ -424,7 +424,7 @@
     }
 
     async function doLogin(){
-      if(!supabase){
+      if(!supabaseClient){
         setText('loginHint', 'Supabase není inicializované.');
         return;
       }
@@ -482,7 +482,7 @@
         return;
       }
 
-      const { error: upErr } = await supabase
+      const { error: upErr } = await supabaseClient
         .from('profiles')
         .update({ must_change_password: false })
         .eq('id', state.user.id);
@@ -580,7 +580,7 @@
 
         setHTML('view', '<h2>Uživatelé</h2><div class="card">Načítám…</div>');
 
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from('profiles')
           .select('id,email,role,locked_owner,must_change_password,google_linked')
           .order('email', { ascending: true });
