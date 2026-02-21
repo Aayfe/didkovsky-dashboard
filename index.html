@@ -348,38 +348,44 @@
 
     // === UI WIRING ===
     function wireUI(){
-      // login buttons
-      $('btnLogin').addEventListener('click', () => openLogin());
-      $('btnLogin2').addEventListener('click', () => openLogin());
-      $('btnCloseLogin').addEventListener('click', () => closeLogin());
-      $('btnDoLogin').addEventListener('click', () => doLogin());
+      // Používáme .onclick (ne addEventListener), aby se to po redeploy / logoutu nikdy „neduplikovalo“.
+      const b1 = $('btnLogin');
+      const b2 = $('btnLogin2');
+      const bClose = $('btnCloseLogin');
+      const bDo = $('btnDoLogin');
+      const bSavePw = $('btnSavePw');
 
-      // modal close by backdrop
-      $('loginModal').addEventListener('click', (e) => { if(e.target === $('loginModal')) closeLogin(); });
-      $('pwModal').addEventListener('click', (e) => { if(e.target === $('pwModal')) {/* locked */} });
+      if(b1) b1.onclick = openLogin;
+      if(b2) b2.onclick = openLogin;
+      if(bClose) bClose.onclick = closeLogin;
+      if(bDo) bDo.onclick = doLogin;
+      if(bSavePw) bSavePw.onclick = savePw;
+
+      // backdrop close
+      const lm = $('loginModal');
+      if(lm) lm.onclick = (e) => { if(e.target === lm) closeLogin(); };
 
       // nav
       qsa('.nav a').forEach(a => {
-        a.addEventListener('click', (e) => {
+        a.onclick = (e) => {
           e.preventDefault();
           const view = a.getAttribute('data-view');
           setActiveView(view);
-        });
+        };
       });
 
       // enter submits
-      $('pass').addEventListener('keydown', (e) => { if(e.key === 'Enter') doLogin(); });
-      $('newpass').addEventListener('keydown', (e) => { if(e.key === 'Enter') savePw(); });
-
-      // pw
-      $('btnSavePw').addEventListener('click', () => savePw());
+      const pass = $('pass');
+      if(pass) pass.onkeydown = (e) => { if(e.key === 'Enter') doLogin(); };
+      const np = $('newpass');
+      if(np) np.onkeydown = (e) => { if(e.key === 'Enter') savePw(); };
 
       // esc
-      window.addEventListener('keydown', (e) => {
+      window.onkeydown = (e) => {
         if(e.key === 'Escape'){
-          if($('loginModal').classList.contains('open')) closeLogin();
+          if($('loginModal')?.classList.contains('open')) closeLogin();
         }
-      });
+      };
     }
 
     function openLogin(){
@@ -470,7 +476,6 @@
       if(state.profile.must_change_password){
         openPw();
       }
-    }
     }
 
     async function savePw(){
@@ -652,7 +657,22 @@
 
       const { data } = await supabaseClient.auth.getSession();
       if(data.session?.user){
-        state.user = data.sessi
+        state.user = data.session.user;
+        try {
+          state.profile = await loadProfile(state.user.id);
+          if(state.profile){
+            enterApp();
+          } else {
+            badge(false, 'Supabase: chybí profil');
+          }
+        } catch (e) {
+          badge(false, 'Supabase: profil/RLS problém');
+          console.error(e);
+        }
+      }
+    }
+
+    // boot
     window.addEventListener('DOMContentLoaded', () => {
       wireUI();
       restoreSession();
