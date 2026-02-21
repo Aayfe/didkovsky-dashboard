@@ -658,8 +658,10 @@
     }
 
     // boot
-    wireUI();
-    restoreSession();
+    window.addEventListener('DOMContentLoaded', () => {
+      wireUI();
+      restoreSession();
+    });
   </script>
 </body>
 </html>
