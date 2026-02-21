@@ -490,20 +490,131 @@
       }
 
       if(state.view === 'overview'){
-        root.innerHTML = `<h2>Přehled</h2><div class="card">Vítej v dashboardu.</div>`;
+        root.innerHTML = `
+          <h2>Přehled</h2>
+          <div class="card">
+            <div class="kpi">
+              <div class="item">
+                <div class="label">Dnes</div>
+                <div class="value" id="kpiToday">—</div>
+              </div>
+              <div class="item">
+                <div class="label">Posledních 24h</div>
+                <div class="value" id="kpi24">—</div>
+              </div>
+              <div class="item">
+                <div class="label">Posledních 7 dní</div>
+                <div class="value" id="kpi7">—</div>
+              </div>
+            </div>
+          </div>
+        `;
+        loadStats();
       }
 
       if(state.view === 'drive'){
-        root.innerHTML = `<h2>Google Disk</h2><div class="card">Drive integrace přijde v dalším kroku.</div>`;
+        root.innerHTML = `<h2>Google Disk</h2><div class="card">Drive integrace přijde v dalším kroku (OAuth flow + API).</div>`;
       }
 
       if(state.view === 'users'){
         if(!can.manageUsers(state.profile)){
           root.innerHTML = '<div class="card">Nemáš oprávnění.</div>';
         } else {
-          root.innerHTML = '<div class="card">Správa uživatelů přijde v dalším kroku.</div>';
+          root.innerHTML = `
+            <h2>Uživatelé</h2>
+            <div class="card">
+              <div class="row" style="margin-bottom:10px">
+                <input class="input" id="newUserEmail" placeholder="email@domena.cz" />
+                <select class="input" id="newUserRole">
+                  <option value="host">Host</option>
+                  <option value="moderator">Moderátor</option>
+                  <option value="owner">Owner</option>
+                </select>
+                <button class="btn" onclick="createUser()">Přidat</button>
+              </div>
+              <div id="usersList">Načítám…</div>
+            </div>
+          `;
+          loadUsers();
         }
       }
+    }
+
+    async function loadStats(){
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const last24 = new Date(now.getTime() - 24*60*60*1000);
+      const last7 = new Date(now.getTime() - 7*24*60*60*1000);
+
+      const { data: d1 } = await supabaseClient
+        .from('pageviews')
+        .select('id', { count: 'exact' })
+        .gte('created_at', todayStart.toISOString());
+
+      const { data: d2 } = await supabaseClient
+        .from('pageviews')
+        .select('id', { count: 'exact' })
+        .gte('created_at', last24.toISOString());
+
+      const { data: d3 } = await supabaseClient
+        .from('pageviews')
+        .select('id', { count: 'exact' })
+        .gte('created_at', last7.toISOString());
+
+      document.getElementById('kpiToday').textContent = d1?.length || 0;
+      document.getElementById('kpi24').textContent = d2?.length || 0;
+      document.getElementById('kpi7').textContent = d3?.length || 0;
+    }
+
+    async function loadUsers(){
+      const { data } = await supabaseClient
+        .from('profiles')
+        .select('id,email,role,locked_owner');
+
+      const list = document.getElementById('usersList');
+      if(!data){ list.textContent = 'Chyba načítání.'; return; }
+
+      list.innerHTML = data.map(u => `
+        <div class="row" style="justify-content:space-between; margin-bottom:6px">
+          <div>${u.email} ${u.locked_owner ? '🔒' : ''}</div>
+          <div class="row">
+            <select class="input" onchange="updateRole('${u.id}', this.value)" ${u.locked_owner ? 'disabled' : ''}>
+              <option value="host" ${u.role==='host'?'selected':''}>Host</option>
+              <option value="moderator" ${u.role==='moderator'?'selected':''}>Moderátor</option>
+              <option value="owner" ${u.role==='owner'?'selected':''}>Owner</option>
+            </select>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function createUser(){
+      const email = document.getElementById('newUserEmail').value.trim();
+      const role = document.getElementById('newUserRole').value;
+      if(!email) return;
+
+      const { data, error } = await supabaseClient.auth.signUp({
+        email,
+        password: 'docasneheslo123'
+      });
+
+      if(error){ alert(error.message); return; }
+
+      await supabaseClient
+        .from('profiles')
+        .update({ role })
+        .eq('id', data.user.id);
+
+      loadUsers();
+    }
+
+    async function updateRole(id, role){
+      await supabaseClient
+        .from('profiles')
+        .update({ role })
+        .eq('id', id);
+      loadUsers();
+    }
 
       if(state.view === 'settings'){
         root.innerHTML = '<div class="card">Nastavení systému.</div>';
