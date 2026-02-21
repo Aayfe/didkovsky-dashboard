@@ -1,636 +1,139 @@
 <!doctype html>
 <html lang="cs">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>didkovsky.cz — Dashboard</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --bg:#0b0d10;
-      --panel:rgba(255,255,255,0.04);
-      --panel2:rgba(255,255,255,0.06);
-      --text:rgba(255,255,255,0.92);
-      --muted:rgba(255,255,255,0.62);
-      --line:rgba(255,255,255,0.10);
-      --radius:18px;
-      --shadow: 0 24px 80px rgba(0,0,0,0.55);
-    }
-
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      background:
-        radial-gradient(1200px 700px at 10% 0%, rgba(255,255,255,0.06), transparent 60%),
-        radial-gradient(900px 600px at 100% 40%, rgba(255,255,255,0.04), transparent 65%),
-        var(--bg);
-      color:var(--text);
-    }
-
-    a{text-decoration:none;color:inherit}
-    .wrap{padding:40px 50px 80px}
-
-    header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding-bottom:20px;
-      border-bottom:1px solid var(--line);
-    }
-    .brand{font-weight:600;font-size:18px}
-    .nav{display:flex;align-items:center;gap:12px}
-
-    .btn{
-      padding:9px 14px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background:transparent;
-      color:var(--text);
-      font-size:14px;
-      cursor:pointer;
-      transition:0.2s ease;
-    }
-    .btn:hover{background:var(--panel2)}
-
-    main{margin-top:50px}
-    .hidden{display:none}
-
-    h1{font-size:clamp(34px,5vw,52px);margin:0 0 14px;font-weight:600;line-height:1.08}
-    .subtitle{color:var(--muted);font-size:16px;line-height:1.6;max-width:70ch}
-
-    .dashboard{
-      margin-top:40px;
-      display:grid;
-      grid-template-columns:260px 1fr;
-      gap:24px;
-      align-items:start;
-    }
-
-    .sidebar,.content{
-      background:var(--panel);
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-    }
-
-    .sidebar{padding:20px}
-    .sidebar h3{
-      font-size:13px;
-      text-transform:uppercase;
-      letter-spacing:0.10em;
-      color:var(--muted);
-      margin:0 0 14px;
-    }
-    .sidebar a{
-      display:block;
-      padding:9px 10px;
-      border-radius:12px;
-      color:var(--muted);
-      font-size:14px;
-    }
-    .sidebar a:hover{background:rgba(255,255,255,0.06);color:var(--text)}
-
-    .content{padding:24px}
-
-    .card{
-      background:var(--panel2);
-      padding:16px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      margin-bottom:14px;
-    }
-
-    .kpi{
-      display:flex;
-      gap:14px;
-      flex-wrap:wrap;
-      justify-content:space-between;
-    }
-    .kpi .item{min-width:160px}
-    .kpi .label{color:var(--muted);font-size:12px;margin-bottom:6px}
-    .kpi .value{font-size:22px;font-weight:600}
-
-    .field{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      margin-bottom:12px;
-    }
-    .field label{font-size:12px;color:var(--muted)}
-    .input{
-      width:100%;
-      padding:10px 12px;
-      border-radius:12px;
-      border:1px solid var(--line);
-      background:transparent;
-      color:var(--text);
-      outline:none;
-    }
-
-    .modalBack{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,0.55);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding:20px;
-    }
-    .modalBack.open{display:flex}
-
-    .modal{
-      width:min(520px, 100%);
-      background:rgba(10,12,15,0.92);
-      border:1px solid var(--line);
-      border-radius:22px;
-      box-shadow:var(--shadow);
-      padding:20px;
-      backdrop-filter: blur(10px);
-    }
-    .modalHead{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:10px;
-    }
-    .modalTitle{font-size:16px;font-weight:600;margin:0}
-    .modalNote{color:var(--muted);font-size:13px;line-height:1.6;margin:0}
-
-    .pill{
-      font-size:12px;
-      color:var(--muted);
-      border:1px solid var(--line);
-      padding:6px 10px;
-      border-radius:999px;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-    }
-
-    .row{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-
-    footer{
-      margin-top:80px;
-      border-top:1px solid var(--line);
-      padding-top:20px;
-      color:var(--muted);
-      font-size:14px;
-      display:flex;
-      justify-content:space-between;
-      flex-wrap:wrap;
-      gap:8px;
-    }
-
-    @media(max-width:900px){
-      .dashboard{grid-template-columns:1fr}
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>didkovsky.cz — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+--bg:#0b0d10;
+--panel:rgba(255,255,255,0.04);
+--panel2:rgba(255,255,255,0.06);
+--text:rgba(255,255,255,0.92);
+--muted:rgba(255,255,255,0.62);
+--line:rgba(255,255,255,0.10);
+--radius:18px;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui;background:var(--bg);color:var(--text)}
+.wrap{padding:40px 50px 80px}
+header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:20px}
+.brand{font-weight:600}
+.btn{padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--text);cursor:pointer}
+.btn:hover{background:var(--panel2)}
+.hidden{display:none}
+.dashboard{margin-top:40px;display:grid;grid-template-columns:260px 1fr;gap:24px}
+.sidebar,.content{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius)}
+.sidebar{padding:20px}
+.sidebar a{display:block;padding:8px 10px;border-radius:12px;color:var(--muted)}
+.sidebar a:hover{background:var(--panel2);color:var(--text)}
+.content{padding:24px}
+.card{background:var(--panel2);padding:16px;border-radius:14px;margin-bottom:14px}
+.modalBack{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center}
+.modalBack.open{display:flex}
+.modal{background:#111;border:1px solid var(--line);padding:20px;border-radius:20px;width:420px}
+.input{width:100%;padding:10px;border-radius:12px;border:1px solid var(--line);background:#111;color:white;margin-bottom:10px}
+</style>
 </head>
 <body>
-  <div class="wrap">
-
-    <header>
-      <div class="brand">Jakub Didkovský</div>
-      <div class="nav" id="topNav">
-        <button class="btn" onclick="openLogin()">Login</button>
-      </div>
-    </header>
-
-    <main>
-      <section id="landing">
-        <h1>Soukromý dashboard.</h1>
-        <p class="subtitle">
-          Přihlášení → dashboard → Drive + statistiky + správa uživatelů.
-          
-          <br><br>
-          Pozn.: tenhle soubor je <b>UI prototyp</b>. Aby fungoval Google Drive, statistiky a role bezpečně, potřebuješ backend (viz architektura níže v Nastavení).
-        </p>
-        <div class="row" style="margin-top:18px">
-          <button class="btn" onclick="openLogin()">Přihlásit se</button>
-          <span class="pill">RBAC · Drive · Analytics</span>
-        </div>
-      </section>
-
-      <section id="app" class="hidden">
-        <div class="dashboard">
-
-          <div class="sidebar">
-            <h3>Navigace</h3>
-            <a href="#" data-view="overview" onclick="setView(event)">Přehled</a>
-            <a href="#" data-view="drive" onclick="setView(event)">Google Disk</a>
-            <a href="#" data-view="users" onclick="setView(event)">Uživatelé</a>
-            <a href="#" data-view="settings" onclick="setView(event)">Nastavení</a>
-
-            <div style="height:14px"></div>
-
-            <div class="card" style="margin:0; background:transparent">
-              <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap">
-                <div>
-                  <div style="font-size:12px; color:var(--muted); margin-bottom:4px">Přihlášen jako</div>
-                  <div id="who" style="font-size:14px">—</div>
-                </div>
-                <div id="roleBadge" class="pill">—</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="content">
-            <div id="view"></div>
-          </div>
-
-        </div>
-      </section>
-
-      <!-- Login modal -->
-      <div class="modalBack" id="loginModal" role="dialog" aria-modal="true">
-        <div class="modal">
-          <div class="modalHead">
-            <div>
-              <p class="modalTitle">Přihlášení</p>
-              <p class="modalNote">
-                Bezpečná verze bude dělat přihlášení přes backend (hashované heslo, session cookie).
-                Nehardcoduju sem skutečné přihlašovací údaje.
-              </p>
-            </div>
-            <button class="btn" onclick="closeLogin()">Zavřít</button>
-          </div>
-
-          <div class="field">
-            <label for="email">E-mail</label>
-            <input class="input" id="email" type="email" value="jakub@didkovsky.cz" autocomplete="username" />
-          </div>
-
-          <div class="field">
-            <label for="pass">Heslo</label>
-            <input class="input" id="pass" type="password" placeholder="(zadáš své heslo)" autocomplete="current-password" />
-            <div style="color:var(--muted); font-size:12px; line-height:1.6">
-              Demo režim: přihlas se heslem <b>demo</b>.
-              V produkci budou dočasná hesla a vynucená změna po prvním přihlášení.
-            </div>
-          </div>
-
-          <div class="row" style="justify-content:space-between">
-            <button class="btn" onclick="doLogin()">Login</button>
-            <span class="pill" id="loginHint">—</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Force password change modal (first login) -->
-      <div class="modalBack" id="pwModal" role="dialog" aria-modal="true">
-        <div class="modal">
-          <div class="modalHead">
-            <div>
-              <p class="modalTitle">Změna hesla</p>
-              <p class="modalNote">Při prvním přihlášení je nutná změna hesla.</p>
-            </div>
-            <button class="btn" onclick="closePw()">Později</button>
-          </div>
-
-          <div class="field">
-            <label for="newpass">Nové heslo</label>
-            <input class="input" id="newpass" type="password" placeholder="Zvol silné heslo" autocomplete="new-password" />
-          </div>
-
-          <div class="row" style="justify-content:space-between">
-            <button class="btn" onclick="savePw()">Uložit</button>
-            <span class="pill" id="pwHint">—</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Connect Google modal -->
-      <div class="modalBack" id="googleModal" role="dialog" aria-modal="true">
-        <div class="modal">
-          <div class="modalHead">
-            <div>
-              <p class="modalTitle">Propojit Google účet</p>
-              <p class="modalNote">
-                Aby fungoval Google Drive, musí uživatel po prvním přihlášení propojit svůj Google účet.
-                V produkci to bude OAuth flow (Google).
-              </p>
-            </div>
-            <button class="btn" onclick="closeGoogle()">Zavřít</button>
-          </div>
-
-          <div class="card" style="margin:0">
-            <div style="font-weight:600; margin-bottom:6px">Co se stane</div>
-            <div style="color:var(--muted); font-size:14px; line-height:1.6">
-              1) Klikneš „Připojit Google“ → Google OAuth consent
-              <br>2) Dashboard získá token pro Drive API
-              <br>3) Uloží se propojení k uživateli (v DB)
-            </div>
-          </div>
-
-          <div class="row" style="margin-top:12px; justify-content:space-between">
-            <button class="btn" onclick="mockConnectGoogle()">Připojit Google (demo)</button>
-            <span class="pill" id="googleHint">—</span>
-          </div>
-        </div>
-      </div>
-
-    </main>
-
-    <footer>
-      <div>© 2026 · didkovsky.cz</div>
-      <div>Private dashboard</div>
-    </footer>
-
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    // ⚠️ DŮLEŽITÉ:
-    // Sem vlož své skutečné hodnoty ze Supabase (Publishable key je bezpečná pro frontend)
-    const SUPABASE_URL = "https://jfvywczxlqwpmoivfipi.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_fmIDjWp5Oi_7cbZt4-80Jw_sSdThg2N";
-
-    let supabaseClient = null;
-
-    try {
-      if (
-        SUPABASE_URL &&
-        SUPABASE_URL.startsWith("https://") &&
-        SUPABASE_ANON_KEY &&
-        !SUPABASE_ANON_KEY.includes("VLOZ_SEM")
-      ) {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      } else {
-        console.warn("Supabase není nastaveno – zkontroluj URL a ANON KEY.");
-      }
-    } catch (e) {
-      console.error("Chyba při inicializaci Supabase:", e);
-    }
-
-    const OWNER_EMAIL = 'jakub@didkovsky.cz';
-
-    const state = {
-      user: null,
-      profile: null,
-      view: 'overview',
-      stats: { today: 0, last24h: 0, last7d: 0 }
-    };
-
-    const roleLabel = (role) => ({ host:'Host', moderator:'Moderátor', owner:'Owner' }[role] || role);
-
-    const can = {
-      upload: (u) => u?.role === 'moderator' || u?.role === 'owner',
-      manageUsers: (u) => u?.role === 'owner',
-    };
-
-    async function loadProfile(userId){
-      const { data, error } = await supabaseClient
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if(error) return null;
-      return data;
-    }
-
-    async function doLogin(){
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('pass').value;
-
-      const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if(error){
-        document.getElementById('loginHint').textContent = error.message;
-        return;
-      }
-
-      state.user = data.user;
-      state.profile = await loadProfile(data.user.id);
-
-      closeLogin();
-      enterApp();
-
-      if(state.profile?.must_change_password){
-        openPw();
-      }
-    }
-
-    async function savePw(){
-      const p = document.getElementById('newpass').value;
-      if(!p || p.length < 8){
-        document.getElementById('pwHint').textContent = 'Minimálně 8 znaků';
-        return;
-      }
-
-      const { error } = await supabaseClient.auth.updateUser({ password: p });
-      if(error){
-        document.getElementById('pwHint').textContent = error.message;
-        return;
-      }
-
-      await supabaseClient
-        .from('profiles')
-        .update({ must_change_password: false })
-        .eq('id', state.user.id);
-
-      state.profile.must_change_password = false;
-      closePw();
-    }
-
-    async function logout(){
-      await supabaseClient.auth.signOut();
-      state.user = null;
-      state.profile = null;
-      document.getElementById('app').classList.add('hidden');
-      document.getElementById('landing').classList.remove('hidden');
-      document.getElementById('topNav').innerHTML = '<button class="btn" onclick="openLogin()">Login</button>';
-    }
-
-    function enterApp(){
-      document.getElementById('landing').classList.add('hidden');
-      document.getElementById('app').classList.remove('hidden');
-      document.getElementById('topNav').innerHTML = '<button class="btn" onclick="logout()">Logout</button>';
-      hydrateUserCard();
-      render();
-    }
-
-    function hydrateUserCard(){
-      const who = document.getElementById('who');
-      const badge = document.getElementById('roleBadge');
-
-      if(!state.profile){
-        who.textContent = '—';
-        badge.textContent = '—';
-        return;
-      }
-
-      who.textContent = state.profile.email;
-      badge.textContent = roleLabel(state.profile.role);
-    }
-
-    function setView(e){
-      e.preventDefault();
-      state.view = e.currentTarget.getAttribute('data-view');
-      render();
-    }
-
-    function render(){
-      const root = document.getElementById('view');
-      if(!state.profile){
-        root.innerHTML = '<div class="card">Nejsi přihlášen.</div>';
-        return;
-      }
-
-      if(state.view === 'overview'){
-        root.innerHTML = `
-          <h2>Přehled</h2>
-          <div class="card">
-            <div class="kpi">
-              <div class="item">
-                <div class="label">Dnes</div>
-                <div class="value" id="kpiToday">—</div>
-              </div>
-              <div class="item">
-                <div class="label">Posledních 24h</div>
-                <div class="value" id="kpi24">—</div>
-              </div>
-              <div class="item">
-                <div class="label">Posledních 7 dní</div>
-                <div class="value" id="kpi7">—</div>
-              </div>
-            </div>
-          </div>
-        `;
-        loadStats();
-      }
-
-      if(state.view === 'drive'){
-        root.innerHTML = `<h2>Google Disk</h2><div class="card">Drive integrace přijde v dalším kroku (OAuth flow + API).</div>`;
-      }
-
-      if(state.view === 'users'){
-        if(!can.manageUsers(state.profile)){
-          root.innerHTML = '<div class="card">Nemáš oprávnění.</div>';
-        } else {
-          root.innerHTML = `
-            <h2>Uživatelé</h2>
-            <div class="card">
-              <div class="row" style="margin-bottom:10px">
-                <input class="input" id="newUserEmail" placeholder="email@domena.cz" />
-                <select class="input" id="newUserRole">
-                  <option value="host">Host</option>
-                  <option value="moderator">Moderátor</option>
-                  <option value="owner">Owner</option>
-                </select>
-                <button class="btn" onclick="createUser()">Přidat</button>
-              </div>
-              <div id="usersList">Načítám…</div>
-            </div>
-          `;
-          loadUsers();
-        }
-      }
-    }
-
-    async function loadStats(){
-      const now = new Date();
-      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const last24 = new Date(now.getTime() - 24*60*60*1000);
-      const last7 = new Date(now.getTime() - 7*24*60*60*1000);
-
-      const { data: d1 } = await supabaseClient
-        .from('pageviews')
-        .select('id', { count: 'exact' })
-        .gte('created_at', todayStart.toISOString());
-
-      const { data: d2 } = await supabaseClient
-        .from('pageviews')
-        .select('id', { count: 'exact' })
-        .gte('created_at', last24.toISOString());
-
-      const { data: d3 } = await supabaseClient
-        .from('pageviews')
-        .select('id', { count: 'exact' })
-        .gte('created_at', last7.toISOString());
-
-      document.getElementById('kpiToday').textContent = d1?.length || 0;
-      document.getElementById('kpi24').textContent = d2?.length || 0;
-      document.getElementById('kpi7').textContent = d3?.length || 0;
-    }
-
-    async function loadUsers(){
-      const { data } = await supabaseClient
-        .from('profiles')
-        .select('id,email,role,locked_owner');
-
-      const list = document.getElementById('usersList');
-      if(!data){ list.textContent = 'Chyba načítání.'; return; }
-
-      list.innerHTML = data.map(u => `
-        <div class="row" style="justify-content:space-between; margin-bottom:6px">
-          <div>${u.email} ${u.locked_owner ? '🔒' : ''}</div>
-          <div class="row">
-            <select class="input" onchange="updateRole('${u.id}', this.value)" ${u.locked_owner ? 'disabled' : ''}>
-              <option value="host" ${u.role==='host'?'selected':''}>Host</option>
-              <option value="moderator" ${u.role==='moderator'?'selected':''}>Moderátor</option>
-              <option value="owner" ${u.role==='owner'?'selected':''}>Owner</option>
-            </select>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    async function createUser(){
-      const email = document.getElementById('newUserEmail').value.trim();
-      const role = document.getElementById('newUserRole').value;
-      if(!email) return;
-
-      const { data, error } = await supabaseClient.auth.signUp({
-        email,
-        password: 'docasneheslo123'
-      });
-
-      if(error){ alert(error.message); return; }
-
-      await supabaseClient
-        .from('profiles')
-        .update({ role })
-        .eq('id', data.user.id);
-
-      loadUsers();
-    }
-
-    async function updateRole(id, role){
-      await supabaseClient
-        .from('profiles')
-        .update({ role })
-        .eq('id', id);
-      loadUsers();
-    }
-
-    function openLogin(){ document.getElementById('loginModal').classList.add('open'); }
-    function closeLogin(){ document.getElementById('loginModal').classList.remove('open'); }
-    function openPw(){ document.getElementById('pwModal').classList.add('open'); }
-    function closePw(){ document.getElementById('pwModal').classList.remove('open'); }
-
-    // Auto-session restore
-    window.addEventListener('load', async () => {
-      const { data } = await supabaseClient.auth.getSession();
-      if(data.session){
-        state.user = data.session.user;
-        state.profile = await loadProfile(state.user.id);
-        enterApp();
-      }
-    });
-  </script>
-
+<div class="wrap">
+<header>
+<div class="brand">Jakub Didkovský</div>
+<div id="topNav"><button class="btn" onclick="openLogin()">Login</button></div>
+</header>
+
+<section id="landing">
+<h1>Soukromý dashboard</h1>
+<button class="btn" onclick="openLogin()">Přihlásit se</button>
+</section>
+
+<section id="app" class="hidden">
+<div class="dashboard">
+<div class="sidebar">
+<a href="#" onclick="showOverview()">Přehled</a>
+<a href="#" onclick="showUsers()">Uživatelé</a>
+<div class="card" style="margin-top:20px">
+<div id="who">—</div>
+<div id="role"></div>
+</div>
+</div>
+<div class="content" id="view"></div>
+</div>
+</section>
+
+<div class="modalBack" id="loginModal">
+<div class="modal">
+<h3>Přihlášení</h3>
+<input class="input" id="email" placeholder="Email" />
+<input class="input" id="pass" type="password" placeholder="Heslo" />
+<button class="btn" onclick="doLogin()">Login</button>
+<div id="loginHint" style="margin-top:10px;color:#ff6b6b"></div>
+</div>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://jfvywczxlqwpmoivfipi.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_fmIDjWp5Oi_7cbZt4-80Jw_sSdThg2N";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentProfile = null;
+
+function openLogin(){document.getElementById('loginModal').classList.add('open')}
+function closeLogin(){document.getElementById('loginModal').classList.remove('open')}
+
+async function doLogin(){
+const email=document.getElementById('email').value.trim();
+const password=document.getElementById('pass').value;
+const {data,error}=await supabase.auth.signInWithPassword({email,password});
+if(error){document.getElementById('loginHint').innerText=error.message;return}
+closeLogin();
+loadProfile(data.user.id);
+}
+
+async function loadProfile(id){
+const {data}=await supabase.from('profiles').select('*').eq('id',id).single();
+if(!data){alert('Profil nenalezen');return}
+currentProfile=data;
+enterApp();
+}
+
+function enterApp(){
+document.getElementById('landing').classList.add('hidden');
+document.getElementById('app').classList.remove('hidden');
+document.getElementById('topNav').innerHTML='<button class="btn" onclick="logout()">Logout</button>';
+document.getElementById('who').innerText=currentProfile.email;
+document.getElementById('role').innerText=currentProfile.role;
+showOverview();
+}
+
+async function logout(){
+await supabase.auth.signOut();
+location.reload();
+}
+
+function showOverview(){
+document.getElementById('view').innerHTML=`<h2>Přehled</h2><div class="card">Vítej v dashboardu.</div>`;
+}
+
+async function showUsers(){
+if(currentProfile.role!=='owner'){document.getElementById('view').innerHTML='<div class="card">Nemáš oprávnění</div>';return}
+const {data}=await supabase.from('profiles').select('email,role');
+let html='<h2>Uživatelé</h2><div class="card">';
+data.forEach(u=>{html+=`<div>${u.email} — ${u.role}</div>`});
+html+='</div>';
+document.getElementById('view').innerHTML=html;
+}
+
+window.addEventListener('load',async()=>{
+const {data}=await supabase.auth.getSession();
+if(data.session){loadProfile(data.session.user.id)}
+});
+</script>
 </body>
 </html>
