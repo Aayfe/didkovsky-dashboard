@@ -354,7 +354,7 @@
     const SUPABASE_URL = "https://jfvywczxlqwpmoivfipi.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_fmIDjWp5Oi_7cbZt4-80Jw_sSdThg2N";
 
-    let supabase = null;
+    let supabaseClient = null;
 
     try {
       if (
@@ -363,7 +363,7 @@
         SUPABASE_ANON_KEY &&
         !SUPABASE_ANON_KEY.includes("VLOZ_SEM")
       ) {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       } else {
         console.warn("Supabase není nastaveno – zkontroluj URL a ANON KEY.");
       }
@@ -388,7 +388,7 @@
     };
 
     async function loadProfile(userId){
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClient
         .from('profiles')
         .select('*')
         .eq('id', userId)
@@ -402,7 +402,7 @@
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('pass').value;
 
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
         email,
         password
       });
@@ -430,13 +430,13 @@
         return;
       }
 
-      const { error } = await supabase.auth.updateUser({ password: p });
+      const { error } = await supabaseClient.auth.updateUser({ password: p });
       if(error){
         document.getElementById('pwHint').textContent = error.message;
         return;
       }
 
-      await supabase
+      await supabaseClient
         .from('profiles')
         .update({ must_change_password: false })
         .eq('id', state.user.id);
@@ -446,7 +446,7 @@
     }
 
     async function logout(){
-      await supabase.auth.signOut();
+      await supabaseClient.auth.signOut();
       state.user = null;
       state.profile = null;
       document.getElementById('app').classList.add('hidden');
@@ -517,7 +517,7 @@
 
     // Auto-session restore
     window.addEventListener('load', async () => {
-      const { data } = await supabase.auth.getSession();
+      const { data } = await supabaseClient.auth.getSession();
       if(data.session){
         state.user = data.session.user;
         state.profile = await loadProfile(state.user.id);
